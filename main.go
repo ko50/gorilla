@@ -22,9 +22,6 @@ var (
 	testVoiceChannelID   = "700920014475362348"
 	stopBot              = make(chan bool)
 	vcsession            *discordgo.VoiceConnection
-	allBanana            = [4]string{"バナナ", "ばなな", "banana", "🍌"}
-	allUnchi             = [10]string{"うんこ", "ウンコ", "うんち", "ウンチ", "クソ", "くそ", "unchi", "unnchi", "💩", "うーんこ"}
-	banana               = 1
 )
 
 func main() {
@@ -73,54 +70,31 @@ func onMessageCreate(session *discordgo.Session, message *discordgo.MessageCreat
 	}
 
 	checkMessageContent(session, message, channel)
+
+	// UhoCommandを呼び出し
+	if strings.HasPrefix(message.Content, "uho") {
+		uho.Call(session, message, channel)
+	}
 }
 
+// メッセージの中に特定の要素が含まれているかチェック
 func checkMessageContent(session *discordgo.Session, message *discordgo.MessageCreate, channel *discordgo.Channel) {
 	messageContent := message.Content
 	communicate.ThrowUnko(session, message, channel)
+	communicate.CountBanana(session, messageContent, channel)
 
-	switch {
-	case strings.HasPrefix(messageContent, "うほ"):
+	if strings.HasPrefix(messageContent, "うほ") {
 		communicate.SendMessage(session, channel, "ｳｯﾎ↑ｳﾎ↓ｳﾎ？？ｳﾎ↓wwww")
-
-	case strings.HasPrefix(messageContent, "uho"):
-		uho.Call(session, message, channel)
-
-	case strings.Contains(messageContent, "うほ"):
+	}
+	if strings.Contains(messageContent, "うほ") {
 		communicate.SendMessage(session, channel, "ウホッ")
+	}
 
-	case strings.Contains(messageContent, "バナナ") || strings.Contains(messageContent, "ばなな") || strings.Contains(messageContent, "banana") || strings.Contains(messageContent, "🍌"):
-		communicate.SendMessage(session, channel, strings.Repeat("ウホ", banana))
-		if banana < 101 {
-			for _, sumpleBanana := range allBanana {
-				banana += strings.Count(messageContent, sumpleBanana)
-			}
-		}
-	case strings.Contains(messageContent, "とは"):
+	// とは が含まれていたらGoogle検索を実行し上位三件の結果を返します(製作中)
+	if strings.Contains(messageContent, "とは") {
 		fmt.Println("ウホ")
 		url := "https://godoc.org/github.com/PuerkitoBio/goquery" // "https://www.google.com/search?q=ゴリラ"
 		scraping.GetSearchResults(url)
 	}
+
 }
-
-/*
-VC関連のチュートリアル
-
-//メッセージを受信した時の、声の初めと終わりにPrintされるようだ
-func onVoiceReceived(vc *discordgo.VoiceConnection, vs *discordgo.VoiceSpeakingUpdate) {
-	log.Print("しゃべったあああああ")
-}
-
-case strings.HasPrefix(messageContent, fmt.Sprintf("%s %s", botID, "!join")):
-	guildChannels, _ := session.GuildChannels(channel.GuildID)
-	var sendText string
-	for _, a := range guildChannels {
-		sendText += fmt.Sprintf("%vチャンネルの%v(IDは%v)\n", a.Type, a.Name, a.ID)
-	}
-	communicate.SendMessage(session, channel, sendText)
-	vcsession, _ = session.ChannelVoiceJoin(channel.GuildID, "700920014475362348", false, false)
-	vcsession.AddHandler(onVoiceReceived) //音声受信時のイベントハンドラ
-
-case strings.HasPrefix(messageContent, fmt.Sprintf("%s %s", botID, "!disconnect")):
-	vcsession.Disconnect() //今いる通話チャンネルから抜ける
-*/

@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// Call PreFix "uho" によって呼び出されるゴリラコマンド
+// Call PreFix "uho" によってゴリラコマンドが呼び出される
 func Call(session *discordgo.Session, message *discordgo.MessageCreate, channel *discordgo.Channel) {
 	mainCommand, subCommands, _, err := FormatOrder(message.Content)
 
