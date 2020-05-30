@@ -64,8 +64,8 @@ func onMessageCreate(session *discordgo.Session, message *discordgo.MessageCreat
 	channelName := parse.ChannelName(message.ChannelID)
 
 	if message.Author.ID != botID || !(message.Author.Bot && channelName == "Git Log") {
-		// log.Println(utf8.RuneCountInString(messageContent))
-		fmt.Printf("\n%s/%10s %20s\n    %s :  %s\n", guildName, channelName, time.Now().Format(time.Stamp), message.Author.Username, messageContent)
+		// log.Println(utf8.RuneCountInString(message.Content))
+		fmt.Printf("\n%s/%10s %20s\n    %s :  %s\n", guildName, channelName, time.Now().Format(time.Stamp), message.Author.Username, message.Content)
 	}
 
 	if message.Author.Bot {
