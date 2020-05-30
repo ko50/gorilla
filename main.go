@@ -64,69 +64,42 @@ func onMessageCreate(session *discordgo.Session, message *discordgo.MessageCreat
 	channelName := parse.ChannelName(message.ChannelID)
 
 	if message.Author.ID != botID || !(message.Author.Bot && channelName == "Git Log") {
-		// log.Println(utf8.RuneCountInString(message.Content))
-		fmt.Printf("\n%s/%10s %20s\n    %s :  %s\n", guildName, channelName, time.Now().Format(time.Stamp), message.Author.Username, message.Content)
+		// log.Println(utf8.RuneCountInString(messageContent))
+		fmt.Printf("\n%s/%10s %20s\n    %s :  %s\n", guildName, channelName, time.Now().Format(time.Stamp), message.Author.Username, messageContent)
 	}
-
-	throwUnko(session, message, channel)
 
 	if message.Author.Bot {
 		return
 	}
 
+	checkMessageContent(session, message, channel)
+}
+
+func checkMessageContent(session *discordgo.Session, message *discordgo.MessageCreate, channel *discordgo.Channel) {
+	messageContent := message.Content
+	communicate.ThrowUnko(session, message, channel)
+
 	switch {
-	case strings.HasPrefix(message.Content, "うほ"):
+	case strings.HasPrefix(messageContent, "うほ"):
 		communicate.SendMessage(session, channel, "ｳｯﾎ↑ｳﾎ↓ｳﾎ？？ｳﾎ↓wwww")
 
-	case strings.HasPrefix(message.Content, "uho"):
-		callUhoCommands(session, message, channel)
+	case strings.HasPrefix(messageContent, "uho"):
+		uho.Call(session, message, channel)
 
-	case strings.Contains(message.Content, "うほ"):
+	case strings.Contains(messageContent, "うほ"):
 		communicate.SendMessage(session, channel, "ウホッ")
 
-	case strings.Contains(message.Content, "バナナ") || strings.Contains(message.Content, "ばなな") || strings.Contains(message.Content, "banana") || strings.Contains(message.Content, "🍌"):
+	case strings.Contains(messageContent, "バナナ") || strings.Contains(messageContent, "ばなな") || strings.Contains(messageContent, "banana") || strings.Contains(messageContent, "🍌"):
 		communicate.SendMessage(session, channel, strings.Repeat("ウホ", banana))
 		if banana < 101 {
 			for _, sumpleBanana := range allBanana {
-				banana += strings.Count(message.Content, sumpleBanana)
+				banana += strings.Count(messageContent, sumpleBanana)
 			}
 		}
-	case strings.Contains(message.Content, "とは"):
+	case strings.Contains(messageContent, "とは"):
 		fmt.Println("ウホ")
 		url := "https://godoc.org/github.com/PuerkitoBio/goquery" // "https://www.google.com/search?q=ゴリラ"
 		scraping.GetSearchResults(url)
-	}
-}
-
-// PreFix "uho" によって呼び出されるゴリラコマンド
-func callUhoCommands(session *discordgo.Session, message *discordgo.MessageCreate, channel *discordgo.Channel) {
-	mainCommand, _, subCommands := uho.FormatOrder(message.Content)
-
-	switch mainCommand {
-	case "react":
-		if len(subCommands) < 2 {
-			communicate.SendMessage(session, channel, "ウホ(リアクションを付けたいメッセージのIDと絵文字を入力してください)")
-			return
-		}
-		messageID := subCommands[0]
-		emojiList := subCommands[1:]
-		uho.AddReactions(session, channel, messageID, emojiList)
-
-	default:
-		communicate.SendMessage(session, channel, "ウホ")
-	}
-}
-
-// 部分文字列 "うんこ" 等を含むメッセージにゴリラがウンコを投げつける関数
-func throwUnko(session *discordgo.Session, message *discordgo.MessageCreate, channel *discordgo.Channel) {
-	if channel.ID == "683950833393467435" {
-		return
-	}
-	for _, unchi := range allUnchi {
-		if strings.Contains(message.Content, unchi) {
-			session.MessageReactionAdd(channel.ID, message.ID, "💩")
-			return
-		}
 	}
 }
 
@@ -138,7 +111,7 @@ func onVoiceReceived(vc *discordgo.VoiceConnection, vs *discordgo.VoiceSpeakingU
 	log.Print("しゃべったあああああ")
 }
 
-case strings.HasPrefix(message.Content, fmt.Sprintf("%s %s", botID, "!join")):
+case strings.HasPrefix(messageContent, fmt.Sprintf("%s %s", botID, "!join")):
 	guildChannels, _ := session.GuildChannels(channel.GuildID)
 	var sendText string
 	for _, a := range guildChannels {
@@ -148,6 +121,6 @@ case strings.HasPrefix(message.Content, fmt.Sprintf("%s %s", botID, "!join")):
 	vcsession, _ = session.ChannelVoiceJoin(channel.GuildID, "700920014475362348", false, false)
 	vcsession.AddHandler(onVoiceReceived) //音声受信時のイベントハンドラ
 
-case strings.HasPrefix(message.Content, fmt.Sprintf("%s %s", botID, "!disconnect")):
+case strings.HasPrefix(messageContent, fmt.Sprintf("%s %s", botID, "!disconnect")):
 	vcsession.Disconnect() //今いる通話チャンネルから抜ける
 */
